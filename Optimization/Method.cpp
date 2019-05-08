@@ -19,33 +19,52 @@ double minGolden(double min, double max)
 	return (max + min) / 2;
 }
 double dX();
-std::string Powell() { 
+std::string Powell(std::map < std::string, std::vector<double>>v,std::string e) {
+	std::string returnValue;
+	//
+	//
+	for (auto i = v.begin(); i != v.end(); i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			std::cout <<" "<< i->second[j];
+		}
+		std::cout << std::endl;
+	}
+	std::cout << e << std::endl;
+	return returnValue; 
+}
+std::string Newton(std::map < std::string, std::vector<double>>v, std::string e) {
 	std::string returnValue;
 	//
 	//
 	return returnValue; 
 }
-std::string Newton() { 
-	std::string returnValue;
-	//
-	//
-	return returnValue; 
-}
-std::string Steep_Descent() { 
+std::string Steep_Descent(std::map < std::string, std::vector<double>>v, std::string e) {
 	std::string returnValue; 
 	//
 	//
 	return returnValue; 
 }
-std::string Quasi_Newton() { 
+std::string Quasi_Newton(std::map < std::string, std::vector<double>>v, std::string e) {
 	std::string returnValue;
 	//
 	//
 	return returnValue; 
 }
-std::string Conjugate_Gradient() {
+std::string Conjugate_Gradient(std::map < std::string, std::vector<double>>v, std::string e) {
 	std::string returnValue; 
 	//
 	//
 	return returnValue; 
+}
+double STRtoD(std::string str)
+{
+	double num;
+	std::stringstream ss;
+	ss << str;
+	ss >> num;
+	ss.str("");
+	ss.clear();
+	return num;
 }

@@ -235,11 +235,13 @@ namespace Optimization {
 			// 
 			// button2
 			// 
+			this->button2->Font = (gcnew System::Drawing::Font(L"·L³n¥¿¶ÂÅé", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(136)));
 			this->button2->Location = System::Drawing::Point(1039, 116);
 			this->button2->Name = L"button2";
 			this->button2->Size = System::Drawing::Size(227, 197);
 			this->button2->TabIndex = 13;
-			this->button2->Text = L"button2";
+			this->button2->Text = L"CALCULATE";
 			this->button2->UseVisualStyleBackColor = true;
 			this->button2->Click += gcnew System::EventHandler(this, &MyForm::button2_Click);
 			// 
@@ -447,42 +449,79 @@ private: System::Void textBox6_TextChanged(System::Object^  sender, System::Even
 private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) {
 	int index = this->comboBox1->SelectedIndex;
 	std::string Result;
-	String ^ xVar = textBox1->Text;
-	String ^ xMin = textBox2->Text;
-	String ^ xMax = textBox3->Text;
-	String ^ yVar = textBox6->Text;
-	String ^ yMin = textBox5->Text;
-	String ^ yMax= textBox4->Text;
+	std::vector<std::string>XVar,YVar;
+	String ^ xVar = textBox1->Text; std::string xvar; MarshalString(xVar, xvar);
+	String ^ xMin = textBox2->Text; std::string xmin; MarshalString(xMin, xmin);
+	String ^ xMax = textBox3->Text; std::string xmax; MarshalString(xMax, xmax);
+	String ^ yVar = textBox6->Text; std::string yvar; MarshalString(yVar, yvar);
+	String ^ yMin = textBox5->Text; std::string ymin; MarshalString(yMin, ymin);
+	String ^ yMax= textBox4->Text; std::string ymax; MarshalString(yMax, ymax);
+	std::vector<double>Xvar, Yvar;
 	if (index == -1)
-		MessageBox::Show("Select Method!");
+		MessageBox::Show("Select Method!"); //input error
 	else
 	{
-		switch (index)
+		//if has data convert to Double
+		if (xvar != "")
 		{
-		case 0:
-			Result = Powell();
-			break;
-		case 1:
-			Result = Newton();
-			break;
-		case 2:
-			Result = Quasi_Newton();
-			break;
-		case 3:
-			Result = Steep_Descent();
-			break;
-		case 4:
-			Result = Conjugate_Gradient();
-			break;
-		default:
-			break;
+			XVar.push_back(xvar);
+			XVar.push_back(xmin);
+			XVar.push_back(xmax);
+			for (int i = 0; i < 3; i++)
+				Xvar.push_back(STRtoD(XVar[i]));
 		}
-		Output->Text += gcnew String(Result.c_str());
+		if (yvar != "")
+		{
+			YVar.push_back(yvar);
+			YVar.push_back(ymin);
+			YVar.push_back(ymax);
+			for (int i = 0; i < 3; i++)
+				Yvar.push_back(STRtoD(YVar[i]));
+		}
+		//
+		String ^input = Input->Text;
+		std::string temp;
+		MarshalString(input, temp);
+		if ((XVar.size() == 0 && YVar.size() == 0) || (temp == ""))
+		{
+			//Input error!!!!!!
+		}
+		else
+		{
+			std::map < std::string, std::vector<double> >VAR;
+			VAR.insert(std::pair<std::string, std::vector<double>>("x", Xvar));
+			VAR.insert(std::pair<std::string, std::vector<double>>("y", Yvar));
+			std::string selEquation = dataManager->EquationsMap[(int)STRtoD(temp)];
+			switch (index)
+			{
+			case 0:
+				Result = Powell(VAR,selEquation);
+				break;
+			case 1:
+				Result = Newton(VAR, selEquation);
+				break;
+			case 2:
+				Result = Quasi_Newton(VAR, selEquation);
+				break;
+			case 3:
+				Result = Steep_Descent(VAR, selEquation);
+				break;
+			case 4:
+				Result = Conjugate_Gradient(VAR, selEquation);
+				break;
+			default:
+				break;
+			}
+			Output->Text += gcnew String(Result.c_str());
+			Output->Text += Environment::NewLine;
+			Input->Clear();
+		}
+		
 		//do some thing
-		for (auto i = dataManager->EquationsMap.begin(); i != dataManager->EquationsMap.end(); i++)
+		/*for (auto i = dataManager->EquationsMap.begin(); i != dataManager->EquationsMap.end(); i++)
 		{
 			std::cout <<i->first<<" " << i->second << std::endl;
-		}
+		}*/
 
 
 

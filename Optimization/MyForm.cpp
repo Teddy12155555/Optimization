@@ -9,4 +9,5 @@ int main(array<String^>^ argv)
 	Application::SetCompatibleTextRenderingDefault(false);
 	Optimization::MyForm windowsForm;
 	Application::Run(%windowsForm);
+
 }
