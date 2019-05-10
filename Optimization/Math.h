@@ -8,3 +8,5 @@ vector<double> operator *(const vector<double>& v1, const vector<double>& v2);
 vector<double> operator + (const vector<double>& v1, const vector<double>& v2);
 vector<double> operator - (const vector<double>& v1, const vector<double>& v2);
 double F(const vector<double>& var, std::string Equation);
+vector<double> gradient(vector<double>& var, std::string Equation);
+vector<vector<double>> Hessian(const vector<double>& var, const string& Equation);
