@@ -1,5 +1,5 @@
 #include "Method.h"
-double F(std::map<std::string, double>Var, std::string Equation);
+
 double minGolden(double min, double max)
 {
 	//double up = min + (max - min) / phi;
