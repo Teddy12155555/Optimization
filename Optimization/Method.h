@@ -7,8 +7,10 @@
 #include<stack>
 #include<limits>
 #define D 1e-8
+#define Pi 3.14159265359
 //double phi = (sqrt(5) + 1) / 2;
 double F(std::vector<double>Var,std::string Equation);
+double TriFuction(int index,double value);
 double minGolden(double min, double max);
 double dX();
 std::string Powell(std::map < std::string, std::vector<double> >v, std::string e);

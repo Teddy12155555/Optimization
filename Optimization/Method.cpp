@@ -1,16 +1,41 @@
 #include "Method.h"
 int priority(char op) {
 	switch (op) {
-	case '^':return 3;
+	case 'a':case 'b':case 'c':case 'd':case 'e':case 'f':
+		return 2;
+	case '^':return 4;
 	case '+': case '-': return 1;
-	case '*': case '/': return 2;
+	case '*': case '/': return 3;
 	default:            return -1;
+	}
+}
+double TriFuction(int index, double value)
+{
+	double var;
+	switch (index)
+	{
+	case 0:
+		return sin(value * (Pi/180));
+	case 1:
+		return cos(value * (Pi/180));
+	case 2:
+		return tan(value * (Pi / 180));
+	case 3:
+		return 1/ (tan(value * (Pi / 180)));
+	case 4:
+		return 1/(cos(value * (Pi / 180)));
+	case 5:
+		return 1 / (sin(value * (Pi / 180)));
+	default:
+		return 0;
+		break;
 	}
 }
 double F(std::vector<double>Var, std::string Equation)
 {
 	std::vector<std::string>alterVar{ "x","y" };
 	std::vector<std::string>Trigonometric{ "sin","cos","tan","cot","sec","csc" };
+	std::vector<std::string>Trtemp{ "a","b","c","d","e","f" };
 	//alter var to value
 	for (int i = 0; i < Var.size(); i++)
 	{
@@ -38,6 +63,24 @@ double F(std::vector<double>Var, std::string Equation)
 	if (flag)
 	{
 		//Trigonometric
+		for (int i = 0; i < 6; i++)
+		{
+			while (Equation.find(Trigonometric[i])!=std::string::npos)
+			{
+				auto pos = Equation.find(Trigonometric[i]);
+				Equation.erase(pos, 4);
+				Equation.insert(pos,Trtemp[i]);
+				for (auto j = pos; j < Equation.length(); j++)
+				{
+					if (Equation[j] == ')')
+					{
+						pos = j;
+						break;
+					}
+				}
+				Equation.erase(pos, 1);
+			}
+		}
 	}
 	bool str_flag = false;
 	std::string temp;
@@ -56,7 +99,7 @@ double F(std::vector<double>Var, std::string Equation)
 			}
 			st.push(Equation[i]);
 			break;
-		case '+' : case '-': case '*': case '/': case '^':
+		case '+': case '-': case '*': case '/': case '^': case 'a':case 'b':case 'c':case 'd':case 'e':case 'f':
 			if (str_flag)
 			{
 				post.push_back(STRtoD(temp));
@@ -105,7 +148,6 @@ double F(std::vector<double>Var, std::string Equation)
 		else
 			std::cout << " " << post[i];
 	}
-	std::cout << "\n";
 	//compute value
 	std::vector<double>result;
 	int opIndex = 0;
@@ -115,6 +157,9 @@ double F(std::vector<double>Var, std::string Equation)
 		{
 			switch (operators[opIndex++])
 			{
+			case 'a':case 'b':case 'c':case 'd':case 'e':case 'f':
+				result[result.size() - 1] = TriFuction(operators[opIndex-1]-'a',result[result.size() - 1]);
+				break;
 			case '+':
 				result[result.size() - 2] = result[result.size() - 1] + result[result.size() - 2];
 				result.pop_back();
