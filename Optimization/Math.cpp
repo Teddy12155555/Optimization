@@ -69,9 +69,10 @@ vector<vector<double>> Hessian(const vector<double>& var, const string& Equation
 	else {
 		vector<double> hx(2,0), hy(2,0);
 		hx[0] = hy[1] = 1e-5;
-		double dxx = (F(var + hx + hx, Equation) - 2 * F(var, Equation) + F(var - hx - hx, Equation)) / (4 * hx[0] * hx[0]);
-		double dyy = (F(var + hy + hy, Equation) - 2 * F(var, Equation) + F(var - hy - hy, Equation)) / (4 * hx[0] * hx[0]);
-		double dxy = (F(var + hx + hy, Equation) - F(var - hx + hy, Equation) - F(var + hx - hy, Equation) + F(var - hx - hy, Equation)) / (4 * hx[0] * hx[0]);
+		double dxx = (F(var + hx , Equation) - 2 * F(var, Equation) + F(var - hx , Equation)) / (4 * hx[0] * hx[0]);
+		double dyy = (F(var + hy, Equation) - 2 * F(var, Equation) + F(var - hy , Equation)) / (4 * hx[0] * hx[0]);
+		double dxy = (F(var + hx , Equation) - F(var - hx + hy, Equation) - F(var + hx - hy, Equation) + F(var - hx - hy, Equation)) / (4 * hx[0] * hx[0]);
+		//double  dxy = (F(var + hy + hx, Equation) - F(var - hy - hx, Equation)) / (2 * 1e-5);
 		vector<vector<double>> re(2, vector<double>(2, 0));
 		re[0][0] = dxx;
 		re[0][1] = re[1][0] = dxy;
@@ -139,9 +140,20 @@ double F(std::vector<double>Var, std::string Equation)
 		{
 			auto pos = Equation.find(alterVar[i]);
 			Equation.erase(pos, alterVar[i].length());
-			Equation.insert(pos, std::to_string(Var[i]));
+			if (Var[i] < 0)
+			{
+				Equation.insert(pos, "@");
+				Equation.insert(pos+1, std::to_string(-1*Var[i]));
+			}
+			else
+			{
+				Equation.insert(pos, std::to_string( Var[i]));
+			}
 		}
 	}
+	if (Equation[0] == '-')
+		Equation[0] = '@';
+	std::cout << Equation << std::endl;
 	bool flag = false;
 	for (int i = 0; i < Trigonometric.size(); i++)
 	{
@@ -156,6 +168,7 @@ double F(std::vector<double>Var, std::string Equation)
 	std::stack<char>st;
 	std::vector<double>post;
 	std::vector<char>operators;
+	std::cout << Equation << std::endl;
 	if (flag)
 	{
 		//Trigonometric
@@ -230,6 +243,10 @@ double F(std::vector<double>Var, std::string Equation)
 			}
 			st.pop();
 			break;
+		case '@':
+			str_flag = true;
+			temp += "-";
+			break;
 		default:
 			str_flag = true;
 			temp += Equation[i];
@@ -237,13 +254,14 @@ double F(std::vector<double>Var, std::string Equation)
 		}
 	}
 	int j = 0;
-	/*for (int i = 0; i < post.size(); i++)
+	for (int i = 0; i < post.size(); i++)
 	{
 		if (post[i] == DBL_MAX)
 			std::cout << "  " << operators[j++];
 		else
 			std::cout << " " << post[i];
-	}*/
+	}
+	std::cout << std::endl;
 	//compute value
 	std::vector<double>result;
 	int opIndex = 0;
