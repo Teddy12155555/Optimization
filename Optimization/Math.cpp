@@ -3,7 +3,7 @@ vector<double> operator *(const vector<vector<double>>& m1, const vector<double>
 	vector<double> re(v.size(), 0);
 	for (int i = 0; i < v.size(); i++) 
 		for (int j = 0; j < m1[i].size(); j++) 
-			re[i] += m1[i][j] * v[i];
+			re[i] += m1[i][j] * v[j];
 	return re;
 }
 vector<double> operator *(const vector<double>& v,const vector<vector<double>>& m1) {
@@ -72,6 +72,7 @@ vector<vector<double>> Hessian(const vector<double>& var, const string& Equation
 		double dxx = (F(var + hx + hx, Equation) - 2 * F(var, Equation) + F(var - hx - hx, Equation)) / (4 * hx[0] * hx[0]);
 		double dyy = (F(var + hy + hy, Equation) - 2 * F(var, Equation) + F(var - hy - hy, Equation)) / (4 * hx[0] * hx[0]);
 		double dxy = (F(var + hx + hy, Equation) - F(var - hx + hy, Equation) - F(var + hx - hy, Equation) + F(var - hx - hy, Equation)) / (4 * hx[0] * hx[0]);
+
 		vector<vector<double>> re(2, vector<double>(2, 0));
 		re[0][0] = dxx;
 		re[0][1] = re[1][0] = dxy;
@@ -139,9 +140,23 @@ double F(std::vector<double>Var, std::string Equation)
 		{
 			auto pos = Equation.find(alterVar[i]);
 			Equation.erase(pos, alterVar[i].length());
-			Equation.insert(pos, std::to_string(Var[i]));
+			if (Var[i] < 0)
+			{
+				Equation.insert(pos, "@");
+				Equation.insert(pos+1, std::to_string(-1*Var[i]));
+			}
+			else
+			{
+				Equation.insert(pos, std::to_string( Var[i]));
+			}
 		}
 	}
+	if (Equation[0] == '-')
+		Equation[0] = '@';
+#ifdef DEBUG
+	std::cout << Equation << std::endl;
+#endif // DEBUG
+
 	bool flag = false;
 	for (int i = 0; i < Trigonometric.size(); i++)
 	{
@@ -156,6 +171,9 @@ double F(std::vector<double>Var, std::string Equation)
 	std::stack<char>st;
 	std::vector<double>post;
 	std::vector<char>operators;
+#ifdef DEBUG
+	std::cout << Equation << std::endl;
+#endif
 	if (flag)
 	{
 		//Trigonometric
@@ -231,6 +249,10 @@ double F(std::vector<double>Var, std::string Equation)
 			}
 			st.pop();
 			break;
+		case '@':
+			str_flag = true;
+			temp += "-";
+			break;
 		default:
 			str_flag = true;
 			temp += Equation[i];
@@ -238,13 +260,16 @@ double F(std::vector<double>Var, std::string Equation)
 		}
 	}
 	int j = 0;
-	/*for (int i = 0; i < post.size(); i++)
+#ifdef DEBUG
+	for (int i = 0; i < post.size(); i++)
 	{
 		if (post[i] == DBL_MAX)
 			std::cout << "  " << operators[j++];
 		else
 			std::cout << " " << post[i];
-	}*/
+	}
+	std::cout << std::endl;
+#endif
 	//compute value
 	std::vector<double>result;
 	int opIndex = 0;
