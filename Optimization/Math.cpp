@@ -3,14 +3,14 @@ vector<double> operator *(const vector<vector<double>>& m1, const vector<double>
 	vector<double> re(v.size(), 0);
 	for (int i = 0; i < v.size(); i++) 
 		for (int j = 0; j < m1[i].size(); j++) 
-			re[i] += m1[i][j] * v[i];
+			re[i] += m1[i][j] * v[j];
 	return re;
 }
 vector<double> operator *(const vector<double>& v,const vector<vector<double>>& m1) {
 	vector<double> re(v.size(), 0);
 	for (int i = 0; i < v.size(); i++)
 		for (int j = 0; j < m1[i].size(); j++)
-			re[i] += m1[i][j] * v[i];
+			re[i] += m1[i][j] * v[j];
 	return re;
 }
 double operator *(const vector<double>& v1, const vector<double>& v2) {
@@ -62,17 +62,17 @@ vector<double> gradient(vector<double>& var, std::string Equation) {
 }
 vector<vector<double>> Hessian(const vector<double>& var, const string& Equation) {
 	if (var.size() == 1) {
-		vector<double> h(1,1e-5);
+		vector<double> h(1,1e-4);
 		double dxx = (F(var + h + h, Equation) - 2 * F(var, Equation) + F(var - h - h, Equation)) / (4 * h[0] * h[0] );
 		return vector<vector<double>> (1, vector<double>(1, dxx));;
 	}
 	else {
 		vector<double> hx(2,0), hy(2,0);
-		hx[0] = hy[1] = 1e-5;
-		double dxx = (F(var + hx , Equation) - 2 * F(var, Equation) + F(var - hx , Equation)) / (4 * hx[0] * hx[0]);
-		double dyy = (F(var + hy, Equation) - 2 * F(var, Equation) + F(var - hy , Equation)) / (4 * hx[0] * hx[0]);
-		//double dxy = (F(var + hx , Equation) - F(var - hx + hy, Equation) - F(var + hx - hy, Equation) + F(var - hx - hy, Equation)) / (4 * hx[0] * hx[0]);
-		double  dxy = (F(var + hy + hx, Equation) - F(var - hy - hx, Equation)) / ( 1e-5 * 1e-5);
+
+		hx[0] = hy[1] = 1e-4;
+		double dxx = (F(var + hx + hx, Equation) - 2 * F(var, Equation) + F(var - hx - hx, Equation)) / (4 * hx[0] * hx[0]);
+		double dyy = (F(var + hy + hy, Equation) - 2 * F(var, Equation) + F(var - hy - hy, Equation)) / (4 * hx[0] * hx[0]);
+		double dxy = (F(var + hx + hy, Equation) - F(var - hx + hy, Equation) - F(var + hx - hy, Equation) + F(var - hx - hy, Equation)) / (4 * hx[0] * hx[0]);
 		vector<vector<double>> re(2, vector<double>(2, 0));
 		re[0][0] = dxx;
 		re[0][1] = re[1][0] = dxy;
@@ -81,9 +81,14 @@ vector<vector<double>> Hessian(const vector<double>& var, const string& Equation
 	}
 }
 double lambda(vector<double>& var, std::string Equation) {
-	vector<double> h = -gradient(var, Equation);
 	vector<vector<double>> A = Hessian(var, Equation);
+	vector<double> h =  -gradient(var, Equation) ;
 	return (h * h) / ((A * h)*h);
+}
+double alpha(vector<double>& var, vector<double>& s, std::string Equation) {
+	vector<vector<double>> A = Hessian(var, Equation);
+	vector<double> h = -gradient(var, Equation);
+	return (h * h) / ((A * s)*s);
 }
 ostream& operator <<(ostream& os, const vector<double>& v) {
 	os << "[ ";
@@ -112,17 +117,17 @@ double TriFuction(int index, double value)
 	switch (index)
 	{
 	case 0:
-		return sin(value * (Pi / 180));
+		return sin(value );
 	case 1:
-		return cos(value * (Pi / 180));
+		return cos(value );
 	case 2:
-		return tan(value * (Pi / 180));
+		return tan(value );
 	case 3:
-		return 1 / (tan(value * (Pi / 180)));
+		return 1 / (tan(value ));
 	case 4:
-		return 1 / (cos(value * (Pi / 180)));
+		return 1 / (cos(value ));
 	case 5:
-		return 1 / (sin(value * (Pi / 180)));
+		return 1 / (sin(value ));
 	default:
 		return 0;
 		break;
@@ -134,26 +139,31 @@ double F(std::vector<double>Var, std::string Equation)
 	std::vector<std::string>Trigonometric{ "sin","cos","tan","cot","sec","csc" };
 	std::vector<std::string>Trtemp{ "a","b","c","d","e","f" };
 	//alter var to value
+	//
 	for (int i = 0; i < Var.size(); i++)
 	{
 		while (Equation.find(alterVar[i]) != std::string::npos)
 		{
 			auto pos = Equation.find(alterVar[i]);
 			Equation.erase(pos, alterVar[i].length());
-			if (Var[i] < 0)
-			{
-				Equation.insert(pos, "@");
-				Equation.insert(pos+1, std::to_string(-1*Var[i]));
-			}
-			else
-			{
-				Equation.insert(pos, std::to_string( Var[i]));
-			}
+			Equation.insert(pos, std::to_string(Var[i]));
 		}
+	}
+	cout << Equation << endl;
+	for (int i = 1;  i < Equation.size()-1; i++)
+	{
+		if (Equation[i] == '-' && isdigit(Equation[i - 1]) == 0)
+			Equation[i] = '@';
+		else
+			continue;
 	}
 	if (Equation[0] == '-')
 		Equation[0] = '@';
+	cout << Equation << endl;
+#ifdef DEBUG
 	std::cout << Equation << std::endl;
+#endif // DEBUG
+
 	bool flag = false;
 	for (int i = 0; i < Trigonometric.size(); i++)
 	{
@@ -168,7 +178,9 @@ double F(std::vector<double>Var, std::string Equation)
 	std::stack<char>st;
 	std::vector<double>post;
 	std::vector<char>operators;
+#ifdef DEBUG
 	std::cout << Equation << std::endl;
+#endif
 	if (flag)
 	{
 		//Trigonometric
@@ -191,6 +203,7 @@ double F(std::vector<double>Var, std::string Equation)
 			}
 		}
 	}
+
 	bool str_flag = false;
 	std::string temp;
 	//std::cout << Equation << std::endl;
@@ -254,6 +267,7 @@ double F(std::vector<double>Var, std::string Equation)
 		}
 	}
 	int j = 0;
+#ifdef DEBUG
 	for (int i = 0; i < post.size(); i++)
 	{
 		if (post[i] == DBL_MAX)
@@ -262,6 +276,7 @@ double F(std::vector<double>Var, std::string Equation)
 			std::cout << " " << post[i];
 	}
 	std::cout << std::endl;
+#endif
 	//compute value
 	std::vector<double>result;
 	int opIndex = 0;
@@ -310,10 +325,30 @@ double STRtoD(std::string str)
 {
 	double num;
 	std::stringstream ss;
+	int couut = 0;
+	for (int i = 0; i < str.length(); i++)
+		if (!(isdigit(str[i])))
+			couut++;
+	int temp = 1;
+	if (couut > 1)
+	{
+		
+		int index = 0;
+		while (isdigit(str[index]) == 0)
+		{
+			if (str[index] == '-')
+				temp *= -1;
+			else
+				temp *= 1;
+			index++;
+		}
+		str.erase(0, index);
+	}
 	ss << str;
 	ss >> num;
 	ss.str("");
 	ss.clear();
+	num *= temp;
 	return num;
 }
 double vlen(const vector<double>& v) {

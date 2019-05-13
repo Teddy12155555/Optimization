@@ -45,7 +45,7 @@ std::string Newton(std::map < std::string, std::vector<double>>v, std::string e)
 }
 std::string Steep_Descent(std::map < std::string, std::vector<double>>v, std::string e) {
 	std::string returnValue = ""; 
-	double L = 0;
+	double L = 0, z;
 	vector<double> h;
 	int i = 0;
 	vector<double> v0, v1;
@@ -59,15 +59,16 @@ std::string Steep_Descent(std::map < std::string, std::vector<double>>v, std::st
 		v0 = v1;
 		h = -gradient(v0, e);
 		L = lambda(v0, e);
+		while ((z = F(v0 + L * h, e)) != z)  L *= 0.9; 
 		v1 = v0 + L * h;
 		cout << "i:	" << i << endl;
 		cout << "h:	" << h << endl;
 		cout << "lamda:	" << L << endl;
 		cout << "v:	" << v1 << endl;
-		cout << "F(v):	"<< F(v1, e) << endl;
+		cout << "F(v):	"<< z << endl;
 		cout << "-------------" << endl;
 		i++;
-	} while (abs(F(v0, e) - F(v1, e)) > error);
+	} while (abs(F(v0, e) - z ) > error);
 
 	//
 	//
@@ -80,7 +81,41 @@ std::string Quasi_Newton(std::map < std::string, std::vector<double>>v, std::str
 	return returnValue; 
 }
 std::string Conjugate_Gradient(std::map < std::string, std::vector<double>>v, std::string e) {
-	std::string returnValue; 
+
+	std::string returnValue = "";
+	double a = 0;
+	double beta;
+	double z;
+	vector<double> S0, S1;
+	vector<double> v0, v1, v2;
+	int i = 0;
+	if (v["y"].size() == 0) v1.push_back(v["x"][0]);
+	else {
+		v1.push_back(v["x"][0]);
+		v1.push_back(v["y"][0]);
+	}
+	do {
+		S0 = S1;
+		if(!i) S1 = -gradient(v1, e);
+		else { 
+			beta = (gradient(v1, e) *  gradient(v1, e)) / (gradient(v0, e) *  gradient(v0, e));
+			S1 = -gradient(v1, e) + beta * S0;
+		}
+		v0 = v1;
+		a = alpha(v1, S1, e);
+		while ((z = F(v1 + a * S1,e)) != z) a *= 0.9;
+		v1 = v1 + a * S1;
+		cout << "i:	" << i << endl;
+		if(i) cout << "beta:	" << beta << endl;
+		cout <<"Si:	" << S1 << endl;
+		cout << "alpha:	" << a << endl;
+		cout << "v:	" << v1 << endl;
+		cout << "F(v):	" << z << endl;
+		cout << "-------------" << endl;
+		i++;
+	} while (abs(F(v0, e) - z) > error);
+
+
 	//
 	//
 	return returnValue; 
