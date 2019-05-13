@@ -10,7 +10,7 @@ vector<double> operator *(const vector<double>& v,const vector<vector<double>>& 
 	vector<double> re(v.size(), 0);
 	for (int i = 0; i < v.size(); i++)
 		for (int j = 0; j < m1[i].size(); j++)
-			re[i] += m1[i][j] * v[i];
+			re[i] += m1[i][j] * v[j];
 	return re;
 }
 double operator *(const vector<double>& v1, const vector<double>& v2) {
@@ -62,7 +62,7 @@ vector<double> gradient(vector<double>& var, std::string Equation) {
 }
 vector<vector<double>> Hessian(const vector<double>& var, const string& Equation) {
 	if (var.size() == 1) {
-		vector<double> h(1,1e-5);
+		vector<double> h(1,1e-4);
 		double dxx = (F(var + h + h, Equation) - 2 * F(var, Equation) + F(var - h - h, Equation)) / (4 * h[0] * h[0] );
 		return vector<vector<double>> (1, vector<double>(1, dxx));;
 	}
@@ -81,9 +81,14 @@ vector<vector<double>> Hessian(const vector<double>& var, const string& Equation
 	}
 }
 double lambda(vector<double>& var, std::string Equation) {
-	vector<double> h = -gradient(var, Equation);
 	vector<vector<double>> A = Hessian(var, Equation);
+	vector<double> h =  -gradient(var, Equation) ;
 	return (h * h) / ((A * h)*h);
+}
+double alpha(vector<double>& var, vector<double>& s, std::string Equation) {
+	vector<vector<double>> A = Hessian(var, Equation);
+	vector<double> h = -gradient(var, Equation);
+	return (h * h) / ((A * s)*s);
 }
 ostream& operator <<(ostream& os, const vector<double>& v) {
 	os << "[ ";
