@@ -58,6 +58,7 @@ std::string Steep_Descent(std::map < std::string, std::vector<double>>v, std::st
 	do {
 		v0 = v1;
 		h = -gradient(v0, e);
+		if (vlen(h)==0) break;
 		L = lambda(v0, e);
 		while ((z = F(v0 + L * h, e)) != z)  L *= 0.9; 
 		v1 = v0 + L * h;

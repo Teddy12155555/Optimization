@@ -150,6 +150,8 @@ double F(std::vector<double>Var, std::string Equation)
 			Equation.insert(pos, std::to_string(Var[i]));
 		}
 	}
+	cout << Equation << endl;
+#endif
 	for (int i = 1;  i < Equation.size()-1; i++)
 	{
 		if (Equation[i] == '-' && isdigit(Equation[i - 1]) == 0)
@@ -159,7 +161,7 @@ double F(std::vector<double>Var, std::string Equation)
 	}
 	if (Equation[0] == '-')
 		Equation[0] = '@';
-#ifdef DEBUG
+	cout << Equation << endl;
 	std::cout << Equation << std::endl;
 #endif // DEBUG
 
