@@ -1,4 +1,5 @@
 #include"Math.h"
+#define DEBUG
 vector<double> operator *(const vector<vector<double>>& m1, const vector<double>& v) {
 	vector<double> re(v.size(), 0);
 	for (int i = 0; i < v.size(); i++) 
@@ -104,10 +105,10 @@ ostream& operator <<(ostream& os, const vector<double>& v) {
 int priority(char op) {
 	switch (op) {
 	case 'a':case 'b':case 'c':case 'd':case 'e':case 'f':
-		return 2;
+		return 3;
 	case '^':return 4;
 	case '+': case '-': return 1;
-	case '*': case '/': return 3;
+	case '*': case '/': return 2;
 	default:            return -1;
 	}
 }
@@ -149,7 +150,6 @@ double F(std::vector<double>Var, std::string Equation)
 			Equation.insert(pos, std::to_string(Var[i]));
 		}
 	}
-	cout << Equation << endl;
 	for (int i = 1;  i < Equation.size()-1; i++)
 	{
 		if (Equation[i] == '-' && isdigit(Equation[i - 1]) == 0)
@@ -159,7 +159,6 @@ double F(std::vector<double>Var, std::string Equation)
 	}
 	if (Equation[0] == '-')
 		Equation[0] = '@';
-	cout << Equation << endl;
 #ifdef DEBUG
 	std::cout << Equation << std::endl;
 #endif // DEBUG
@@ -189,9 +188,9 @@ double F(std::vector<double>Var, std::string Equation)
 			while (Equation.find(Trigonometric[i]) != std::string::npos)
 			{
 				auto pos = Equation.find(Trigonometric[i]);
-				Equation.erase(pos, 4);
+				Equation.erase(pos, 3);
 				Equation.insert(pos, Trtemp[i]);
-				for (auto j = pos; j < Equation.length(); j++)
+				/*for (auto j = pos; j < Equation.length(); j++)
 				{
 					if (Equation[j] == ')')
 					{
@@ -199,7 +198,7 @@ double F(std::vector<double>Var, std::string Equation)
 						break;
 					}
 				}
-				Equation.erase(pos, 1);
+				Equation.erase(pos, 1);*/
 			}
 		}
 	}
