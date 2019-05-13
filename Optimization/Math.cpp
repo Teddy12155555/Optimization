@@ -71,8 +71,8 @@ vector<vector<double>> Hessian(const vector<double>& var, const string& Equation
 		hx[0] = hy[1] = 1e-5;
 		double dxx = (F(var + hx , Equation) - 2 * F(var, Equation) + F(var - hx , Equation)) / (4 * hx[0] * hx[0]);
 		double dyy = (F(var + hy, Equation) - 2 * F(var, Equation) + F(var - hy , Equation)) / (4 * hx[0] * hx[0]);
-		double dxy = (F(var + hx , Equation) - F(var - hx + hy, Equation) - F(var + hx - hy, Equation) + F(var - hx - hy, Equation)) / (4 * hx[0] * hx[0]);
-		//double  dxy = (F(var + hy + hx, Equation) - F(var - hy - hx, Equation)) / (2 * 1e-5);
+		//double dxy = (F(var + hx , Equation) - F(var - hx + hy, Equation) - F(var + hx - hy, Equation) + F(var - hx - hy, Equation)) / (4 * hx[0] * hx[0]);
+		double  dxy = (F(var + hy + hx, Equation) - F(var - hy - hx, Equation)) / ( 1e-5 * 1e-5);
 		vector<vector<double>> re(2, vector<double>(2, 0));
 		re[0][0] = dxx;
 		re[0][1] = re[1][0] = dxy;
