@@ -41,6 +41,43 @@ std::string Newton(std::map < std::string, std::vector<double>>v, std::string e)
 	std::string returnValue;
 	//
 	//
+	std::vector<double>v0,v1;
+	for (auto i = v.begin(); i != v.end(); i++)
+		v1.push_back(i->second[0]);
+	int debug = 0;
+		do 
+		{
+			v0 = v1;
+			cout << debug << "	times\n";
+			double z;
+			bool brek = false;
+			std::vector<double> gradTemp = gradient(v0, e);
+			std::vector<std::vector<double>> HessianTemp = Hessian2(gradTemp, e);
+			for (int i = 0; i < HessianTemp.size(); i++) {
+				for (int j =0;j<HessianTemp[i].size();j++ )
+					if (HessianTemp[i][j] == DBL_MAX) { brek = true; break; }
+				if (brek) break;
+			}if (brek) break;
+			cout << "Hessian\n";
+			for (int i = 0; i < HessianTemp.size(); i++)
+				cout << HessianTemp[i] << endl;
+			HessianTemp = Inverse(HessianTemp);
+			cout << "Hessian inverse\n";
+			for (int i = 0; i < HessianTemp.size(); i++)
+				cout << HessianTemp[i] << endl;
+			v1 = mult(HessianTemp, gradTemp);
+			v1 = -1 * v1;
+			while ((z = F(v0 + v1,e))!= z )
+			{
+				for (int i = 0; i < v0.size(); i++)
+					v1[i] *= 0.9;
+			}
+			v1 = v0 + v1;
+			cout << "x\n";
+			cout << v1 << endl;
+			debug++;
+		} while ((abs(F(v0, e) - F(v1, e)) > error));
+		cout << "min : " << F(v1, e) << endl;
 	return returnValue; 
 }
 std::string Steep_Descent(std::map < std::string, std::vector<double>>v, std::string e) {

@@ -489,8 +489,13 @@ private: System::Void button2_Click(System::Object^  sender, System::EventArgs^ 
 		else
 		{
 			std::map < std::string, std::vector<double> >VAR;
-			VAR.insert(std::pair<std::string, std::vector<double>>("x", Xvar));
-			VAR.insert(std::pair<std::string, std::vector<double>>("y", Yvar));
+			if(YVar.size() ==0)
+				VAR.insert(std::pair<std::string, std::vector<double>>("x", Xvar));
+			else
+			{
+				VAR.insert(std::pair<std::string, std::vector<double>>("x", Xvar));
+				VAR.insert(std::pair<std::string, std::vector<double>>("y", Yvar));
+			}
 			std::string selEquation = dataManager->EquationsMap[(int)STRtoD(temp)];
 			switch (index)
 			{
