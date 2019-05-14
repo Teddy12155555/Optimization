@@ -1,6 +1,6 @@
 #include "Method.h"
 #define phi 1.6180339988
-#define limit 20000
+#define limit 1000
 double minGolden(double min, double max, vector<double>s, vector<double>Var, std::string Equation)
 {
 	int lit = 0;
@@ -106,17 +106,13 @@ std::string Newton(std::map < std::string, std::vector<double>>v, std::string e)
 	//
 	//
 	std::vector<double>v0,v1;
-	vector<double>B;
 	for (auto i = v.begin(); i != v.end(); i++) {
 		v1.push_back(i->second[0]);
-		for (int j = 1; j <= 2; j++)
-			B.push_back(i->second[j]);
 	}
 	int debug = 0;
-	bool flag = true;
+	int lit = 0;
 		do 
 		{
-			int lit = 0;
 			v0 = v1;
 			cout << debug << "	times\n";
 			double z;
@@ -146,9 +142,10 @@ std::string Newton(std::map < std::string, std::vector<double>>v, std::string e)
 			cout << "x\n";
 			cout << v1 << endl;
 			debug++;
+			lit++;
 			if (lit > limit)break;
-			flag = isB(v0, B);
-		} while ((abs(F(v0, e) - F(v1, e)) > error) && (flag));
+			
+		} while ((abs(F(v0, e) - F(v1, e)) > error) );
 		cout << "min : " << F(v1, e) << endl;
 	return returnValue; 
 }
