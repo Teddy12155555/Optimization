@@ -52,3 +52,5 @@ double vlen(const vector<double>& v);
 vector<vector<double>> Inverse(vector<vector<double>>matrix);
 //¯x°}­¼ªk
 vector<double>mult(vector<vector<double>>matrix, vector<double> vec);
+double f(double a, vector<double>s, vector<double>Var, std::string Equation);
+bool isB(vector<double>, vector<double>);

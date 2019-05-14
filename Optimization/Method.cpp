@@ -1,40 +1,104 @@
 #include "Method.h"
-
-double minGolden(double min, double max)
+#define phi 1.6180339988
+#define limit 20000
+double minGolden(double min, double max, vector<double>s, vector<double>Var, std::string Equation)
 {
-	//double up = min + (max - min) / phi;
-	//double dowm = max - (max - min) / phi;
-
-	/*while (fabs(up - dowm) > C)
+	int lit = 0;
+	double up = min + (max - min) / phi;
+	double down = max - (max - min) / phi;
+	while (fabs(up - down) > error)
 	{
-		if (F(dowm) < F(up))
+		lit++;
+		if (f(down,s,Var,Equation) < f(up,s,Var,Equation))
 			max = up;
 		else
-			min = dowm;
-
+			min = down;
+		
 		up = min + (max - min) / phi;
-		dowm = max - (max - min) / phi;
-	}*/
+		down = max - (max - min) / phi;
+		if (lit > limit)break;
+	}
 
 	return (max + min) / 2;
 }
 std::string Powell(std::map < std::string, std::vector<double>>v,std::string e) {
 	std::string returnValue;
 	//
-	//
-	
-	/*for (auto i = v.begin(); i != v.end(); i++)
-	{
-		for (int j = 0; j < 3; j++)
-		{
-			std::cout <<" "<< i->second[j];
-		}
-		std::cout << std::endl;
+	//input
+	int d = v.size();
+	vector<double> X;
+	vector <double>v0,v1;
+	vector <double>boundary;//if one [1][2] or two [1][2][1][2]
+	vector<vector<double>>s;
+	for (auto i = v.begin(); i != v.end(); i++) {
+		v0.push_back(i->second[0]);
+		for (int j = 1; j <= 2; j++)
+			boundary.push_back(i->second[j]);
 	}
-	std::cout << e << std::endl;*/
-	std::vector<double>t{v["x"][0],v["y"][0]};
-	double a = F(t, e);
-	std::cout << a << "!!!!!!!!!!!!!!!!\n";
+	//initial
+	// v0 is X1 
+	// X = f(x)
+	// S initial
+	if (d == 1)
+		s.push_back(vector<double>(1, 1));
+	else
+	{
+		vector<double>temp(2, 0);
+		temp[0] = 1; s.push_back(temp);
+		temp[0] = 0; temp[1] = 1; s.push_back(temp);
+		temp[0] = 1; s.push_back(temp);
+	}
+	int j = 0; 
+	//initial done
+	//cout << F(v0, e) << "!!!!!!!!!!!!!!!!!!!\n";
+	do 
+	{
+		int lit = 0;
+		cout << j << endl;
+		v1 = v0;
+		int i = 0;
+		if (d == 1)
+		{
+			cout << v0 << endl;
+			 double Xdown = (boundary[0] - v0[0]) / s[0][0], Xup = (boundary[1] - v0[0]) / s[0][0];
+			 double a1 = minGolden(Xdown, Xup, s[0], v0, e);
+			 cout << "alpha : " << a1 << endl;
+			 cout << s[0] << endl;
+			 v0 = v0 + a1 * s[0];
+			 cout << v0 << endl;
+			 s[0][0] = a1;
+			 cout << s[0] << endl;
+		}
+		else
+		{
+			cout << i+1 << endl;
+			double sp = 0;
+			if (s[0][0] != 0)sp = s[0][0]; else sp = s[0][1];
+			double Xdown = (boundary[0] - v0[0]) / sp, Xup = (boundary[1] - v0[0]) / sp;
+			double a1 = minGolden(Xdown,Xup,s[0],v0,e);
+			v0 = v0 + a1 * s[0]; ///////1 
+			i++;
+			cout << i+1 << endl;
+			if (s[1][1] != 0)sp = s[1][1]; else sp = s[1][0];
+			double Ydown = (boundary[2] - v0[1]) / s[1][1], Yup = (boundary[3] - v0[1]) / s[1][1];
+			double a2 = minGolden(Ydown, Yup, s[1],v0,e);
+			v0 = v0 + a2 * s[1]; ///////2
+			i++;
+			cout << i+1 << endl;
+			s[2] = a1 * s[0] + a2 * s[1];
+			if (s[2][0] != 0)sp = s[2][0]; else sp = s[2][1];
+			Xdown = (boundary[0] - v0[0]) / s[2][0], Xup = (boundary[1] - v0[0]) / s[2][0];
+			if (s[2][1] != 0)sp = s[2][1]; else sp = s[2][0];
+			Ydown = (boundary[2] - v0[1]) / s[2][1], Yup = (boundary[3] - v0[1]) / s[2][1];
+			Xdown > Ydown ? Xdown = Xdown : Xdown = Ydown; Xup < Yup ? Xup = Xup : Xup = Yup;
+			double a3 = minGolden(Xdown,Xup,s[2],v0,e);
+			v0 = v0 + a3 * s[2]; ////////3
+			s[0] = s[1]; s[1] = s[2];
+		}
+		j++;
+		if (lit > limit)break;
+	} while (abs(F(v0,e)-F(v1,e)) > error);
+	cout << v0 << endl;
 	return returnValue; 
 }
 std::string Newton(std::map < std::string, std::vector<double>>v, std::string e) {
@@ -42,11 +106,17 @@ std::string Newton(std::map < std::string, std::vector<double>>v, std::string e)
 	//
 	//
 	std::vector<double>v0,v1;
-	for (auto i = v.begin(); i != v.end(); i++)
+	vector<double>B;
+	for (auto i = v.begin(); i != v.end(); i++) {
 		v1.push_back(i->second[0]);
+		for (int j = 1; j <= 2; j++)
+			B.push_back(i->second[j]);
+	}
 	int debug = 0;
+	bool flag = true;
 		do 
 		{
+			int lit = 0;
 			v0 = v1;
 			cout << debug << "	times\n";
 			double z;
@@ -76,7 +146,9 @@ std::string Newton(std::map < std::string, std::vector<double>>v, std::string e)
 			cout << "x\n";
 			cout << v1 << endl;
 			debug++;
-		} while ((abs(F(v0, e) - F(v1, e)) > error));
+			if (lit > limit)break;
+			flag = isB(v0, B);
+		} while ((abs(F(v0, e) - F(v1, e)) > error) && (flag));
 		cout << "min : " << F(v1, e) << endl;
 	return returnValue; 
 }

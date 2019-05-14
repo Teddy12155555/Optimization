@@ -1,4 +1,5 @@
 #include"Math.h"
+
 //#define DEBUG
 vector<double> operator *(const vector<vector<double>>& m1, const vector<double>& v) {
 	vector<double> re(v.size(), 0);
@@ -420,5 +421,27 @@ vector<double>mult(vector<vector<double>>matrix, vector<double> vec)
 	else
 	{
 		return vector<double>{matrix[0][0] * vec[0]+ matrix[0][1] * vec[1], matrix[1][0] * vec[0] + matrix[1][1] * vec[1]};
+	}
+}
+double f(double a, vector<double>s, vector<double>Var, std::string Equation)
+{
+	Var = Var + a * s;
+	return F(Var, Equation);
+}
+bool isB(vector<double>v, vector<double>b)
+{
+	if (v.size() == 1)
+	{
+		if (v[0] >= b[0] && v[0] <= b[1])
+			return true;
+		else
+			return false;
+	}
+	else
+	{
+		if (v[0] >= b[0] && v[0] <= b[1] && v[0] >= b[2] && v[0] <= b[3])
+			return true;
+		else
+			return false;
 	}
 }
