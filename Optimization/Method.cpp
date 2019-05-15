@@ -102,6 +102,7 @@ std::string Conjugate_Gradient(std::map < std::string, std::vector<double>>v, st
 			beta = (gradient(v1, e) *  gradient(v1, e)) / (gradient(v0, e) *  gradient(v0, e));
 			S1 = -gradient(v1, e) + beta * S0;
 		}
+		if (vlen(S1) == 0) break;
 		v0 = v1;
 		a = alpha(v1, S1, e);
 		while ((z = F(v1 + a * S1,e)) != z) a *= 0.9;
