@@ -1,4 +1,6 @@
 #include"Math.h"
+
+//#define DEBUG
 vector<double> operator *(const vector<vector<double>>& m1, const vector<double>& v) {
 	vector<double> re(v.size(), 0);
 	for (int i = 0; i < v.size(); i++) 
@@ -18,6 +20,13 @@ double operator *(const vector<double>& v1, const vector<double>& v2) {
 	for (int i = 0; i < v1.size(); i++)
 		re += v1[i] * v2[i];
 	return re;
+}
+vector<double> operator *(const std::vector<double>& v1, const double& scalar) {
+	std::vector<double> value;
+	for (int i = 0; i < v1.size(); i++)
+		value.push_back(v1[i] * scalar);
+	for (int i = 0; i < v1.size(); i++)
+	return value;
 }
 vector<double> operator + (const vector<double>& v1,const vector<double>& v2) {
 	vector<double> re(v1.size());
@@ -64,7 +73,7 @@ vector<vector<double>> Hessian(const vector<double>& var, const string& Equation
 	if (var.size() == 1) {
 		vector<double> h(1,1e-4);
 		double dxx = (F(var + h + h, Equation) - 2 * F(var, Equation) + F(var - h - h, Equation)) / (4 * h[0] * h[0] );
-		return vector<vector<double>> (1, vector<double>(1, dxx));;
+		return vector<vector<double>> (1, vector<double>(1, dxx));
 	}
 	else {
 		vector<double> hx(2,0), hy(2,0);
@@ -73,6 +82,34 @@ vector<vector<double>> Hessian(const vector<double>& var, const string& Equation
 		double dxx = (F(var + hx + hx, Equation) - 2 * F(var, Equation) + F(var - hx - hx, Equation)) / (4 * hx[0] * hx[0]);
 		double dyy = (F(var + hy + hy, Equation) - 2 * F(var, Equation) + F(var - hy - hy, Equation)) / (4 * hx[0] * hx[0]);
 		double dxy = (F(var + hx + hy, Equation) - F(var - hx + hy, Equation) - F(var + hx - hy, Equation) + F(var - hx - hy, Equation)) / (4 * hx[0] * hx[0]);
+		vector<vector<double>> re(2, vector<double>(2, 0));
+		re[0][0] = dxx;
+		re[0][1] = re[1][0] = dxy;
+		re[1][1] = dyy;
+		return re;
+	}
+}
+vector<vector<double>> Hessian2(const vector<double>& var, const string& Equation) {
+	double z;
+	if (var.size() == 1) {
+		vector<double> h(1, 1e-4);
+		
+		double dxx = (F(var + h + h, Equation) - 2 * F(var, Equation) + F(var - h - h, Equation)) / (4 * h[0] * h[0]);
+		if ((z = dxx) != z) return vector<vector<double>>(1, vector<double>(1, DBL_MAX));
+		return vector<vector<double>>(1, vector<double>(1, dxx));
+	}
+	else {
+		vector<double> hx(2, 0), hy(2, 0);
+
+		hx[0] = hy[1] = 1e-4;
+		double dxx = (F(var + hx + hx, Equation) - 2 * F(var, Equation) + F(var - hx - hx, Equation)) / (4 * hx[0] * hx[0]);
+		double dyy = (F(var + hy + hy, Equation) - 2 * F(var, Equation) + F(var - hy - hy, Equation)) / (4 * hx[0] * hx[0]);
+		double dxy = (F(var + hx + hy, Equation) - F(var - hx + hy, Equation) - F(var + hx - hy, Equation) + F(var - hx - hy, Equation)) / (4 * hx[0] * hx[0]);
+		if (((z = dxx) != z) || ((z = dyy) != z) || ((z = dxy) != z))
+		{
+			vector<vector<double>> re(2, vector<double>(2, DBL_MAX));
+			return  re;
+		}
 		vector<vector<double>> re(2, vector<double>(2, 0));
 		re[0][0] = dxx;
 		re[0][1] = re[1][0] = dxy;
@@ -104,10 +141,10 @@ ostream& operator <<(ostream& os, const vector<double>& v) {
 int priority(char op) {
 	switch (op) {
 	case 'a':case 'b':case 'c':case 'd':case 'e':case 'f':
-		return 2;
+		return 3;
 	case '^':return 4;
 	case '+': case '-': return 1;
-	case '*': case '/': return 3;
+	case '*': case '/': return 2;
 	default:            return -1;
 	}
 }
@@ -191,9 +228,9 @@ double F(std::vector<double>Var, std::string Equation)
 			while (Equation.find(Trigonometric[i]) != std::string::npos)
 			{
 				auto pos = Equation.find(Trigonometric[i]);
-				Equation.erase(pos, 4);
+				Equation.erase(pos, 3);
 				Equation.insert(pos, Trtemp[i]);
-				for (auto j = pos; j < Equation.length(); j++)
+				/*for (auto j = pos; j < Equation.length(); j++)
 				{
 					if (Equation[j] == ')')
 					{
@@ -201,7 +238,7 @@ double F(std::vector<double>Var, std::string Equation)
 						break;
 					}
 				}
-				Equation.erase(pos, 1);
+				Equation.erase(pos, 1);*/
 			}
 		}
 	}
@@ -358,4 +395,53 @@ double vlen(const vector<double>& v) {
 	for (auto i : v) 
 		re += i*i;
 	return sqrt(re);
+}
+vector<vector<double>> Inverse(vector<vector<double>>matrix)
+{
+	if (matrix.size() == 1)
+	{
+		matrix[0][0] = 1 / matrix[0][0];
+		return matrix;
+	}
+	else
+	{
+		double det = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+		
+	//inverse
+		matrix[0][1] = -1 * matrix[0][1] / det; matrix[1][0] = -1 * matrix[1][0] / det;
+		std::swap(matrix[0][0], matrix[1][1]);
+		matrix[0][0] /= det; matrix[1][1] /= det;
+		return matrix;
+	}
+}
+vector<double>mult(vector<vector<double>>matrix, vector<double> vec)
+{
+	if (matrix.size() == 1)
+		return vector<double>{matrix[0][0] * vec[0]};
+	else
+	{
+		return vector<double>{matrix[0][0] * vec[0]+ matrix[0][1] * vec[1], matrix[1][0] * vec[0] + matrix[1][1] * vec[1]};
+	}
+}
+double f(double a, vector<double>s, vector<double>Var, std::string Equation)
+{
+	Var = Var + a * s;
+	return F(Var, Equation);
+}
+bool isB(vector<double>v, vector<double>b)
+{
+	if (v.size() == 1)
+	{
+		if (v[0] >= b[0] && v[0] <= b[1])
+			return true;
+		else
+			return false;
+	}
+	else
+	{
+		if (v[0] >= b[0] && v[0] <= b[1] && v[0] >= b[2] && v[0] <= b[3])
+			return true;
+		else
+			return false;
+	}
 }
