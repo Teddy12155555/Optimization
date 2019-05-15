@@ -155,7 +155,10 @@ std::string Steep_Descent(std::map < std::string, std::vector<double>>v, std::st
 	vector<double> h;
 	int i = 0;
 	vector<double> v0, v1;
-	if (v["y"].size() == 0) v1.push_back(v["x"][0]);
+	bool intervalFlag = true;
+
+	if (v["y"].size() == 0)
+		v1.push_back(v["x"][0]);
 	else {
 		v1.push_back(v["x"][0]);
 		v1.push_back(v["y"][0]);
@@ -164,10 +167,20 @@ std::string Steep_Descent(std::map < std::string, std::vector<double>>v, std::st
 	do {
 		v0 = v1;
 		h = -gradient(v0, e);
-		if (vlen(h)==0) break;
+		if (vlen(h) < error) break;
 		L = lambda(v0, e);
 		while ((z = F(v0 + L * h, e)) != z)  L *= 0.9; 
 		v1 = v0 + L * h;
+
+		if (!inInterval(v, v1))
+		{
+			if (intervalFlag) {
+				intervalFlag = false;
+				continue;
+			}
+			break;
+		}
+		intervalFlag = true;
 		cout << "i:	" << i << endl;
 		cout << "h:	" << h << endl;
 		cout << "lamda:	" << L << endl;
@@ -176,6 +189,10 @@ std::string Steep_Descent(std::map < std::string, std::vector<double>>v, std::st
 		cout << "-------------" << endl;
 		i++;
 	} while (abs(F(v0, e) - z ) > error);
+
+	cout << "min v:" << v1 << endl;
+	cout << "min value" << F(v1, e) << endl;
+
 
 	//
 	//
@@ -195,24 +212,44 @@ std::string Conjugate_Gradient(std::map < std::string, std::vector<double>>v, st
 	double z;
 	vector<double> S0, S1;
 	vector<double> v0, v1, v2;
+
+	bool intervalFlag = true;
+
 	int i = 0;
-	if (v["y"].size() == 0) v1.push_back(v["x"][0]);
+	if (v["y"].size() == 0) 
+		v1.push_back(v["x"][0]);
 	else {
 		v1.push_back(v["x"][0]);
 		v1.push_back(v["y"][0]);
 	}
 	do {
 		S0 = S1;
-		if(!i) S1 = -gradient(v1, e);
+		if(!i) 
+			S1 = -gradient(v1, e);
 		else { 
 			beta = (gradient(v1, e) *  gradient(v1, e)) / (gradient(v0, e) *  gradient(v0, e));
 			S1 = -gradient(v1, e) + beta * S0;
 		}
-		if (vlen(S1) == 0) break;
+		if (vlen(S1) < error) break;
 		v0 = v1;
 		a = alpha(v1, S1, e);
-		while ((z = F(v1 + a * S1,e)) != z) a *= 0.9;
+		while ((z = F(v1 + a * S1,e)) != z) 
+			a *= 0.9;
 		v1 = v1 + a * S1;
+		if (vlen(v1 - v0) < error) break;
+
+		if (!inInterval(v, v1))
+		{
+			if (intervalFlag) {
+				intervalFlag = false;
+				continue;
+			}
+			cout << "Out of Interval ~ !" << endl;
+			break;
+		}
+		intervalFlag = true;
+
+		//print
 		cout << "i:	" << i << endl;
 		if(i) cout << "beta:	" << beta << endl;
 		cout <<"Si:	" << S1 << endl;
@@ -223,8 +260,48 @@ std::string Conjugate_Gradient(std::map < std::string, std::vector<double>>v, st
 		i++;
 	} while (abs(F(v0, e) - z) > error);
 
+	cout << "min v:" << v1 << endl;
+	cout << "min value" << F(v1, e) << endl;
 
 	//
 	//
 	return returnValue; 
+}
+bool inInterval(std::map < std::string, std::vector<double>>&v, vector<double>& var) {
+	double xmin, xmax, ymin, ymax;
+	if (var.size() == 1) {
+		xmin = v["x"][1], xmax = v["x"][2];
+		if (var[0] > xmax) {
+			var[0] = xmax;
+			return false;
+		}
+		if (var[0] < xmin) {
+			var[0] = xmin;
+			return false;
+		}
+	}
+	else {
+		bool flag = true;
+		xmin = v["x"][1], xmax = v["x"][2], ymin = v["y"][1], ymax = v["y"][2];
+		if (var[0] > xmax) {
+			flag = false;
+			var[0] = xmax;
+		}
+			
+		if (var[0] < xmin) {
+			flag = false;
+			var[0] = xmin;
+		}
+			
+		if (var[1] > ymax) {
+			flag = false;
+			var[1] = ymax;
+		}
+			
+		if (var[1] < ymin) {
+			flag = false;
+			var[1] = ymin;
+		}
+	}
+	return true;
 }
