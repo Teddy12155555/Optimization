@@ -445,3 +445,5 @@ bool isB(vector<double>v, vector<double>b)
 			return false;
 	}
 }
+
+
