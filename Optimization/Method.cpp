@@ -154,7 +154,7 @@ std::string Steep_Descent(std::map < std::string, std::vector<double>>v, std::st
 	double L = 0, z;
 	vector<double> h;
 	int i = 0;
-	vector<double> v0, v1;
+	vector<double> v0, v1, vin;
 	bool intervalFlag = true;
 
 	if (v["y"].size() == 0)
@@ -169,29 +169,32 @@ std::string Steep_Descent(std::map < std::string, std::vector<double>>v, std::st
 		h = -gradient(v0, e);
 		if (vlen(h) < error) break;
 		L = lambda(v0, e);
-		while ((z = F(v0 + L * h, e)) != z)  L *= 0.9; 
-		v1 = v0 + L * h;
 
-		if (!inInterval(v, v1))
-		{
-			if (intervalFlag) {
-				intervalFlag = false;
-				continue;
-			}
-			break;
-		}
+		while ((z = F(v0 + L * h, e)) != z)  L *= 0.9; 
+
+		v1 = v0 + L * h;
+		
 		intervalFlag = true;
 		cout << "i:	" << i << endl;
 		cout << "h:	" << h << endl;
 		cout << "lamda:	" << L << endl;
 		cout << "v:	" << v1 << endl;
 		cout << "F(v):	"<< z << endl;
-		cout << "-------------" << endl;
-		i++;
-	} while (abs(F(v0, e) - z ) > error);
+		
 
-	cout << "min v:" << v1 << endl;
-	cout << "min value" << F(v1, e) << endl;
+		if (!inInterval(v, v1))
+		{
+			cout << "Out of Interval ~ !" << endl;
+			cout << "v:	" << v1 << endl;
+			cout << "F(v):	" << F(v1, e) << endl;
+		}
+		cout << "-------------" << endl;
+
+		i++;
+	} while (abs(F(v0, e) - z ) > error && i < 100);
+
+	cout << "min v:	" << v1 << endl;
+	cout << "min value:	" << F(v1, e) << endl;
 
 
 	//
@@ -211,7 +214,7 @@ std::string Conjugate_Gradient(std::map < std::string, std::vector<double>>v, st
 	double beta;
 	double z;
 	vector<double> S0, S1;
-	vector<double> v0, v1, v2;
+	vector<double> v0, v1, v2, vin;
 
 	bool intervalFlag = true;
 
@@ -238,16 +241,7 @@ std::string Conjugate_Gradient(std::map < std::string, std::vector<double>>v, st
 		v1 = v1 + a * S1;
 		if (vlen(v1 - v0) < error) break;
 
-		if (!inInterval(v, v1))
-		{
-			if (intervalFlag) {
-				intervalFlag = false;
-				continue;
-			}
-			cout << "Out of Interval ~ !" << endl;
-			break;
-		}
-		intervalFlag = true;
+		
 
 		//print
 		cout << "i:	" << i << endl;
@@ -256,12 +250,24 @@ std::string Conjugate_Gradient(std::map < std::string, std::vector<double>>v, st
 		cout << "alpha:	" << a << endl;
 		cout << "v:	" << v1 << endl;
 		cout << "F(v):	" << z << endl;
+		
+
+		if (!inInterval(v, v1))
+		{
+			cout << "Out of Interval ~ !" << endl;
+			cout << "v:	" << v1 << endl;
+			cout << "F(v):	" << F(v1,e) << endl;
+		}
+
 		cout << "-------------" << endl;
 		i++;
-	} while (abs(F(v0, e) - z) > error);
 
-	cout << "min v:" << v1 << endl;
-	cout << "min value" << F(v1, e) << endl;
+		//intervalFlag = true;
+
+	} while (abs(F(v0, e) - z) > error && i < 100);
+
+	cout << "min v:	" << v1 << endl;
+	cout << "min value:	" << F(v1, e) << endl;
 
 	//
 	//
