@@ -34,6 +34,18 @@ vector<double> operator + (const vector<double>& v1,const vector<double>& v2) {
 		re[i] = v1[i] + v2[i];
 	return re;
 }
+vector<vector<double>> operator +(const vector<vector<double>> &m1, const vector<vector<double>>&m2)
+{
+	vector<vector<double>> re(2, vector<double>(2, 0));
+	for (int i = 0; i < 2; i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			re[i][j] = m1[i][j] + m2[i][j];
+		}
+	}
+	return re;
+}
 vector<double> operator - (const vector<double>& v1, const vector<double>& v2) {
 	vector<double> re(v1.size());
 	for (int i = 0; i < v1.size(); i++)
@@ -445,5 +457,27 @@ bool isB(vector<double>v, vector<double>b)
 			return false;
 	}
 }
-
-
+vector < vector < double>> Vecmult(const vector<double> &vec1, const vector<double> &vec2)
+{
+	vector<vector<double>>re(2, vector<double>(2, 0));
+	for (int i = 0; i < 2; i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			re[i][j] = vec1[i] * vec2[j];
+		}
+	}
+	return re;
+}
+vector < vector < double>> matmult(const double d, const vector < vector < double>> m)
+{
+	vector<vector<double>>re(2, vector<double>(2, 0));
+	for (int i = 0; i < 2; i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			re[i][j]*=d;
+		}
+	}
+	return re;
+}

@@ -28,7 +28,6 @@ vector<double> operator - (const vector<double>& v1, const vector<double>& v2);
 //向量scalar
 vector<double> operator *(const double d, const vector<double>& v2);
 vector<double> operator *(const std::vector<double>& v1, const double& scalar);
-//輸出
 ostream& operator <<(ostream& os, const vector<double>& v);
 
 // 負向量
@@ -54,3 +53,7 @@ vector<vector<double>> Inverse(vector<vector<double>>matrix);
 vector<double>mult(vector<vector<double>>matrix, vector<double> vec);
 double f(double a, vector<double>s, vector<double>Var, std::string Equation);
 bool isB(vector<double>, vector<double>);
+
+vector < vector < double>> Vecmult(const vector<double>&vec1, const vector<double> &vec2);
+vector < vector < double>> matmult (const double d, const vector < vector < double>> m);
+vector<vector<double>> operator +(const vector<vector<double>> &m1, const vector<vector<double>>&m2);

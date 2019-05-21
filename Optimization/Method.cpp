@@ -210,8 +210,68 @@ std::stringstream Steep_Descent(std::map < std::string, std::vector<double>>v, s
 }
 std::stringstream Quasi_Newton(std::map < std::string, std::vector<double>>v, std::string e) {
 	std::stringstream ss;
-	//
-	//
+	std::vector<double>v0, v1;
+	for (auto i = v.begin(); i != v.end(); i++) {
+		v1.push_back(i->second[0]);
+	}
+	double z = 0;
+	if (v1.size() == 1)
+	{
+		std::vector<double>I(1, 1);
+		std::vector<double>d(1, 0);
+		do {
+			v0 = v1;
+			std::vector<double>g = gradient(v0, e);
+			if (g[0] == 0)break;
+			d[0] = -(g[0]*I[0]);
+			std::vector<double> a(1, 0);
+			std::vector<std::vector<double>>Htemp = Hessian(v0, e);
+			double A = -((g[0] )/(Htemp[0][0] *d[0]));
+			//
+			double delX = A * d[0];
+			v1[0] = v0[0] + delX;
+			//fix
+				while ((z = gradient(v1, e)[0] )!= z)
+				{
+					v1[0] -= delX;
+					delX *= 0.9;
+					v1[0] += delX;
+				}
+			double delG = gradient(v1, e)[0] - g[0];
+			I[0] = I[0] + (delX * delX)/(delX*delG) - (I[0] * g[0] * I[0] * g[0])/(g[0] * I[0] * g[0]) ;
+		} while (abs(F(v0,e) - F (v1,e)) > error);
+		cout << v1 << endl;
+	}
+	else
+	{
+		std::vector<std::vector<double>>I(2, vector<double>(2, 0));
+		I[0][0] = 1; I[1][1] = 1;
+		double z = 0;
+		do {
+			v0 = v1;
+			std::vector<double>g = gradient(v0, e);
+			if ((g[0] == 0) || (g[1] == 0))break;
+			std::vector<std::vector<double>>Htemp = Hessian(v0, e);
+			std::vector<double> d = mult(I, g); d[0] *= -1; d[1] *= -1;
+			std::vector<double> Temp = mult(Htemp, d);
+			double A = -((d[0] * g[0] + d[1] * g[1])/(Temp[0] * d[0] + Temp[1] * d[1]));
+			v1 = v0 + (A * d);
+			//fix
+			while ((z = gradient(v1, e)[0]) != z || (z = gradient(v1, e)[0]) != z)
+			{
+				v1 = v1 - (A * d);
+				A *= 0.9;
+				v1 = v1 + (A * d);
+
+			}
+			std::vector<double>delX = A * d;
+			std::vector<double>delG = gradient(v1, e) - gradient(v0, e);
+			std::vector<double>temp1(2, 0); temp1[0] = I[0][0] * g[0] + I[0][1] * g[1]; temp1[1] = I[1][0] * g[0] + I[1][1] * g[1];
+			I = I + matmult((1 / (delX[0] * delG[0] + delX[1] * delG[1])), (Vecmult(delX, delX)))+ matmult((-1 / (temp1[0] * g[0] + temp1[1] * g[1])), (Vecmult(temp1, temp1)));
+		} while ( abs(F(v0, e) - F(v1, e) > error));
+		cout << v1 << endl;
+		cout << F(v1, e);
+	}
 	return ss; 
 }
 std::stringstream Conjugate_Gradient(std::map < std::string, std::vector<double>>v, std::string e) {
