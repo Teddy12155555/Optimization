@@ -54,13 +54,14 @@ std::stringstream Powell(std::map < std::string, std::vector<double>>v,std::stri
 		temp[0] = 0; temp[1] = 1; s.push_back(temp);
 		temp[0] = 1; s.push_back(temp);
 	}
-	int j = 0; 
+	int j = 1; 
 	//initial done
 	//ss<< F(v0, e) << "!!!!!!!!!!!!!!!!!!!\n";
 	do 
 	{
+		ss << "j = " << j << endl;
 		int lit = 0;
-		ss<< j << endl;
+		//ss<< j << endl;
 		v1 = v0;
 		int i = 0;
 		if (d == 1)
@@ -77,20 +78,21 @@ std::stringstream Powell(std::map < std::string, std::vector<double>>v,std::stri
 		}
 		else
 		{
-			ss<< i+1 << endl;
+			ss << "j = " << j << endl;
+			//ss<< i+1 << endl;
 			double sp = 0;
 			if (s[0][0] != 0)sp = s[0][0]; else sp = s[0][1];
 			double Xdown = (boundary[0] - v0[0]) / sp, Xup = (boundary[1] - v0[0]) / sp;
 			double a1 = minGolden(Xdown,Xup,s[0],v0,e);
 			v0 = v0 + a1 * s[0]; ///////1 
 			i++;
-			ss<< i+1 << endl;
+			ss<< "i = " << i+1 << endl;
 			if (s[1][1] != 0)sp = s[1][1]; else sp = s[1][0];
 			double Ydown = (boundary[2] - v0[1]) / s[1][1], Yup = (boundary[3] - v0[1]) / s[1][1];
 			double a2 = minGolden(Ydown, Yup, s[1],v0,e);
 			v0 = v0 + a2 * s[1]; ///////2
 			i++;
-			ss<< i+1 << endl;
+			ss << "i = " << i + 1 << endl;
 			s[2] = a1 * s[0] + a2 * s[1];
 			if (s[2][0] != 0)sp = s[2][0]; else sp = s[2][1];
 			Xdown = (boundary[0] - v0[0]) / s[2][0], Xup = (boundary[1] - v0[0]) / s[2][0];
@@ -103,8 +105,13 @@ std::stringstream Powell(std::map < std::string, std::vector<double>>v,std::stri
 		}
 		j++;
 		if (lit > limit)break;
+		if (!inInterval(v, v0))
+		{
+			break;
+		}
 	} while (abs(F(v0,e)-F(v1,e)) > error);
-	ss<< v0 << endl;
+	ss<< "x : " << v0 << endl;
+	ss << "min : " << F(v0, e) << endl;
 	return ss; 
 }
 std::stringstream Newton(std::map < std::string, std::vector<double>>v, std::string e) {
@@ -130,11 +137,11 @@ std::stringstream Newton(std::map < std::string, std::vector<double>>v, std::str
 					if (HessianTemp[i][j] == DBL_MAX) { brek = true; break; }
 				if (brek) break;
 			}if (brek) break;
-			ss<< "Hessian\n";
+			ss<< "Hessian: ";
 			for (int i = 0; i < HessianTemp.size(); i++)
 				ss<< HessianTemp[i] << endl;
 			HessianTemp = Inverse(HessianTemp);
-			ss<< "Hessian inverse\n";
+			ss<< "Hessian inverse: ";
 			for (int i = 0; i < HessianTemp.size(); i++)
 				ss<< HessianTemp[i] << endl;
 			v1 = mult(HessianTemp, gradTemp);
@@ -145,7 +152,7 @@ std::stringstream Newton(std::map < std::string, std::vector<double>>v, std::str
 					v1[i] *= 0.9;
 			}
 			v1 = v0 + v1;
-			ss<< "x\n";
+			ss<< "x: \n";
 			ss<< v1 << endl;
 			debug++;
 			lit++;
@@ -215,6 +222,7 @@ std::stringstream Quasi_Newton(std::map < std::string, std::vector<double>>v, st
 		v1.push_back(i->second[0]);
 	}
 	double z = 0;
+	ss << "initial Hessian and inverse is I    ";
 	if (v1.size() == 1)
 	{
 		std::vector<double>I(1, 1);
@@ -237,10 +245,14 @@ std::stringstream Quasi_Newton(std::map < std::string, std::vector<double>>v, st
 					delX *= 0.9;
 					v1[0] += delX;
 				}
+				ss << "x : " << v1 << endl;
 			double delG = gradient(v1, e)[0] - g[0];
 			I[0] = I[0] + (delX * delX)/(delX*delG) - (I[0] * g[0] * I[0] * g[0])/(g[0] * I[0] * g[0]) ;
-		} while (abs(F(v0,e) - F (v1,e)) > error);
-		cout << v1 << endl;
+			ss << "Hessian : " << I << endl;
+			ss << endl;
+		} while (abs(F(v0,e) - F (v1,e)) > error );
+		ss << "min : " << F(v1, e) << endl;
+		//cout << v1 << endl;
 	}
 	else
 	{
@@ -264,11 +276,19 @@ std::stringstream Quasi_Newton(std::map < std::string, std::vector<double>>v, st
 				v1 = v1 + (A * d);
 
 			}
+			ss << "x : " << v1 << endl;
 			std::vector<double>delX = A * d;
 			std::vector<double>delG = gradient(v1, e) - gradient(v0, e);
 			std::vector<double>temp1(2, 0); temp1[0] = I[0][0] * g[0] + I[0][1] * g[1]; temp1[1] = I[1][0] * g[0] + I[1][1] * g[1];
 			I = I + matmult((1 / (delX[0] * delG[0] + delX[1] * delG[1])), (Vecmult(delX, delX)))+ matmult((-1 / (temp1[0] * g[0] + temp1[1] * g[1])), (Vecmult(temp1, temp1)));
+			ss << "Hessian : " <<endl;
+			for (int i = 0; i < I.size(); i++)
+			{
+				ss << I[0] << endl;
+			}
+			ss << endl;
 		} while ( abs(F(v0, e) - F(v1, e) > error));
+		ss << "min : " << F(v1, e) << endl;
 		cout << v1 << endl;
 		cout << F(v1, e);
 	}
