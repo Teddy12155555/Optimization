@@ -476,7 +476,7 @@ vector < vector < double>> matmult(const double d, const vector < vector < doubl
 	{
 		for (int j = 0; j < 2; j++)
 		{
-			re[i][j]*=d;
+			re[i][j]=d * m[i][j];
 		}
 	}
 	return re;

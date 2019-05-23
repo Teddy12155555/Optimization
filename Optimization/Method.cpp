@@ -63,7 +63,7 @@ std::stringstream Powell(std::map < std::string, std::vector<double>>v,std::stri
 		int lit = 0;
 		//ss<< j << endl;
 		v1 = v0;
-		int i = 0;
+		int i = 1;
 		if (d == 1)
 		{
 			ss<< v0 << endl;
@@ -78,21 +78,24 @@ std::stringstream Powell(std::map < std::string, std::vector<double>>v,std::stri
 		}
 		else
 		{
-			ss << "j = " << j << endl;
-			//ss<< i+1 << endl;
+			
+			ss<< "i = "<<1 << endl;
+			ss << "X1:" << v0 << endl;
 			double sp = 0;
 			if (s[0][0] != 0)sp = s[0][0]; else sp = s[0][1];
 			double Xdown = (boundary[0] - v0[0]) / sp, Xup = (boundary[1] - v0[0]) / sp;
 			double a1 = minGolden(Xdown,Xup,s[0],v0,e);
 			v0 = v0 + a1 * s[0]; ///////1 
-			i++;
-			ss<< "i = " << i+1 << endl;
+			ss << "X2:" << v0 <<endl;
+			//i++;
+			ss<< "i = " << 2 << endl;
 			if (s[1][1] != 0)sp = s[1][1]; else sp = s[1][0];
 			double Ydown = (boundary[2] - v0[1]) / s[1][1], Yup = (boundary[3] - v0[1]) / s[1][1];
 			double a2 = minGolden(Ydown, Yup, s[1],v0,e);
 			v0 = v0 + a2 * s[1]; ///////2
-			i++;
-			ss << "i = " << i + 1 << endl;
+			ss << "X3:" << v0 << endl;
+			/*i++;
+			ss << "i = " << i + 1 << endl;*/
 			s[2] = a1 * s[0] + a2 * s[1];
 			if (s[2][0] != 0)sp = s[2][0]; else sp = s[2][1];
 			Xdown = (boundary[0] - v0[0]) / s[2][0], Xup = (boundary[1] - v0[0]) / s[2][0];
@@ -100,15 +103,16 @@ std::stringstream Powell(std::map < std::string, std::vector<double>>v,std::stri
 			Ydown = (boundary[2] - v0[1]) / s[2][1], Yup = (boundary[3] - v0[1]) / s[2][1];
 			Xdown > Ydown ? Xdown = Xdown : Xdown = Ydown; Xup < Yup ? Xup = Xup : Xup = Yup;
 			double a3 = minGolden(Xdown,Xup,s[2],v0,e);
+			ss << "alpha : " << a3 << endl;
 			v0 = v0 + a3 * s[2]; ////////3
 			s[0] = s[1]; s[1] = s[2];
+			ss << "S3 : " << s[1] << endl;
+			ss << "X4:" << v0 << endl << endl;
+			
 		}
 		j++;
 		if (lit > limit)break;
-		if (!inInterval(v, v0))
-		{
-			break;
-		}
+		bool tt = inInterval(v, v0);
 	} while (abs(F(v0,e)-F(v1,e)) > error);
 	ss<< "x : " << v0 << endl;
 	ss << "min : " << F(v0, e) << endl;
@@ -280,11 +284,17 @@ std::stringstream Quasi_Newton(std::map < std::string, std::vector<double>>v, st
 			std::vector<double>delX = A * d;
 			std::vector<double>delG = gradient(v1, e) - gradient(v0, e);
 			std::vector<double>temp1(2, 0); temp1[0] = I[0][0] * g[0] + I[0][1] * g[1]; temp1[1] = I[1][0] * g[0] + I[1][1] * g[1];
+			std::vector<vector<double>>degug = matmult((1 / (delX[0] * delG[0] + delX[1] * delG[1])), (Vecmult(delX, delX)));
+			vector<vector<double>>debug2  = matmult((-1 / (temp1[0] * g[0] + temp1[1] * g[1])), (Vecmult(temp1, temp1)));
+			double tttt = (-1 / (temp1[0] * g[0] + temp1[1] * g[1]));
+			vector<vector<double>>tempppppppp = Vecmult(temp1, temp1);
+			vector<vector<double>> ffs = matmult(tttt, tempppppppp);
 			I = I + matmult((1 / (delX[0] * delG[0] + delX[1] * delG[1])), (Vecmult(delX, delX)))+ matmult((-1 / (temp1[0] * g[0] + temp1[1] * g[1])), (Vecmult(temp1, temp1)));
+			//ss << "d:" << d << endl;
 			ss << "Hessian : " <<endl;
 			for (int i = 0; i < I.size(); i++)
 			{
-				ss << I[0] << endl;
+				ss << I[i] << endl;
 			}
 			ss << endl;
 		} while ( abs(F(v0, e) - F(v1, e) > error));
