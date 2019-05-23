@@ -1,6 +1,6 @@
 #include "Method.h"
 #define phi 1.6180339988
-#define limit 1000
+#define limit 100
 
 template<class T>
 string operator +(const char *a, T b) {
@@ -66,15 +66,15 @@ std::stringstream Powell(std::map < std::string, std::vector<double>>v,std::stri
 		int i = 1;
 		if (d == 1)
 		{
-			ss<< v0 << endl;
+			ss<< "X1:		" << v0 << endl;
 			 double Xdown = (boundary[0] - v0[0]) / s[0][0], Xup = (boundary[1] - v0[0]) / s[0][0];
 			 double a1 = minGolden(Xdown, Xup, s[0], v0, e);
-			 ss<< "alpha : " << a1 << endl;
-			 ss<< s[0] << endl;
+			 ss<< "alpha:		" << a1 << endl;
+			 ss<< "X2:		"<< s[0] << endl;
 			 v0 = v0 + a1 * s[0];
-			 ss<< v0 << endl;
+			 ss<< "X3:		" << v0 << endl;
 			 s[0][0] = a1;
-			 ss<< s[0] << endl;
+			 ss<< "S2:		" << s[0] << endl;
 		}
 		else
 		{
@@ -128,41 +128,47 @@ std::stringstream Newton(std::map < std::string, std::vector<double>>v, std::str
 	}
 	int debug = 0;
 	int lit = 0;
-		do 
+		do
 		{
 			v0 = v1;
-			ss<< debug << "	times\n";
+			ss << debug << "	times\n";
 			double z;
 			bool brek = false;
 			std::vector<double> gradTemp = gradient(v0, e);
 			std::vector<std::vector<double>> HessianTemp = Hessian2(gradTemp, e);
 			for (int i = 0; i < HessianTemp.size(); i++) {
-				for (int j =0;j<HessianTemp[i].size();j++ )
+				for (int j = 0; j < HessianTemp[i].size(); j++)
 					if (HessianTemp[i][j] == DBL_MAX) { brek = true; break; }
 				if (brek) break;
 			}if (brek) break;
-			ss<< "Hessian: ";
+			ss << "Hessian: ";
 			for (int i = 0; i < HessianTemp.size(); i++)
-				ss<< HessianTemp[i] << endl;
+				ss << HessianTemp[i] << endl;
 			HessianTemp = Inverse(HessianTemp);
-			ss<< "Hessian inverse: ";
+			ss << "Hessian inverse: ";
 			for (int i = 0; i < HessianTemp.size(); i++)
-				ss<< HessianTemp[i] << endl;
+				ss << HessianTemp[i] << endl;
 			v1 = mult(HessianTemp, gradTemp);
 			v1 = -1 * v1;
-			while ((z = F(v0 + v1,e))!= z )
+			if (v1 != v1) {
+				ss.str("");
+				ss.clear();
+				ss << "error" << endl;
+				return ss;
+			}
+			while ((z = F(v0 + v1, e)) != z)
 			{
 				for (int i = 0; i < v0.size(); i++)
 					v1[i] *= 0.9;
 			}
 			v1 = v0 + v1;
-			ss<< "x: \n";
-			ss<< v1 << endl;
+			ss << "x: \n";
+			ss << v1 << endl;
 			debug++;
 			lit++;
 			if (lit > limit)break;
-			
-		} while ((abs(F(v0, e) - F(v1, e)) > error) );
+
+		} while ((abs(F(v0, e) - F(v1, e)) > error));
 		ss<< "min : " << F(v1, e) << endl;
 	return ss; 
 }
@@ -192,7 +198,6 @@ std::stringstream Steep_Descent(std::map < std::string, std::vector<double>>v, s
 		v1 = v0 + L * h;
 		
 		intervalFlag = true;
-		//re = re + "i:	" + i + "\n";
 		ss << "i:	" << i << endl;
 		ss << "h:	" << h << endl;
 		ss << "lamda:	" << L << endl;
@@ -209,7 +214,7 @@ std::stringstream Steep_Descent(std::map < std::string, std::vector<double>>v, s
 		ss << "-------------" << endl;
 
 		i++;
-	} while (abs(F(v0, e) - z ) > error && i < 100);
+	} while (abs(F(v0, e) - z ) > error && i < limit);
 
 	ss << "min v:	" << v1 << endl;
 	ss << "min value:	" << F(v1, e) << endl;
@@ -227,6 +232,8 @@ std::stringstream Quasi_Newton(std::map < std::string, std::vector<double>>v, st
 	}
 	double z = 0;
 	ss << "initial Hessian and inverse is I    ";
+	int lit = 0;
+
 	if (v1.size() == 1)
 	{
 		std::vector<double>I(1, 1);
@@ -254,7 +261,8 @@ std::stringstream Quasi_Newton(std::map < std::string, std::vector<double>>v, st
 			I[0] = I[0] + (delX * delX)/(delX*delG) - (I[0] * g[0] * I[0] * g[0])/(g[0] * I[0] * g[0]) ;
 			ss << "Hessian : " << I << endl;
 			ss << endl;
-		} while (abs(F(v0,e) - F (v1,e)) > error );
+			++lit;
+		} while (abs(F(v0,e) - F (v1,e)) > error && lit < limit);
 		ss << "min : " << F(v1, e) << endl;
 		//cout << v1 << endl;
 	}
@@ -297,7 +305,8 @@ std::stringstream Quasi_Newton(std::map < std::string, std::vector<double>>v, st
 				ss << I[i] << endl;
 			}
 			ss << endl;
-		} while ( abs(F(v0, e) - F(v1, e) > error));
+			++lit;
+		} while ( abs(F(v0, e) - F(v1, e) > error) && lit < limit);
 		ss << "min : " << F(v1, e) << endl;
 		cout << v1 << endl;
 		cout << F(v1, e);
@@ -361,7 +370,7 @@ std::stringstream Conjugate_Gradient(std::map < std::string, std::vector<double>
 
 		//intervalFlag = true;
 
-	} while (abs(F(v0, e) - z) > error && i < 100);
+	} while (abs(F(v0, e) - z) > error && i < limit);
 
 	ss<< "min v:	" << v1 << endl;
 	ss<< "min value:	" << F(v1, e) << endl;
