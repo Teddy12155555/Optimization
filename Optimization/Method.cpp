@@ -191,9 +191,16 @@ std::stringstream Steep_Descent(std::map < std::string, std::vector<double>>v, s
 		v0 = v1;
 		h = -gradient(v0, e);
 		if (vlen(h) < error) break;
-		L = lambda(v0, e);
 
+
+		L = lambda(v0, e, 0);
 		while ((z = F(v0 + L * h, e)) != z)  L *= 0.9; 
+
+		int identity = 0;
+		do {
+			L = lambda(v0, e, identity);
+			++identity;
+		} while (F(v0 + L * h, e) > F(v0, e));
 
 		v1 = v0 + L * h;
 		
@@ -340,10 +347,21 @@ std::stringstream Conjugate_Gradient(std::map < std::string, std::vector<double>
 			S1 = -gradient(v1, e) + beta * S0;
 		}
 		if (vlen(S1) < error) break;
+
 		v0 = v1;
-		a = alpha(v1, S1, e);
+		a = alpha(v1, S1, e, 0);
+		
 		while ((z = F(v1 + a * S1,e)) != z) 
 			a *= 0.9;
+
+		int identity = 0;
+
+		do {
+			a = alpha(v1, S1, e, identity);
+			++identity;
+		} while (F(v0 + a * S1, e) > F(v0, e));
+
+
 		v1 = v1 + a * S1;
 		if (vlen(v1 - v0) < error) break;
 

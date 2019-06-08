@@ -129,13 +129,25 @@ vector<vector<double>> Hessian2(const vector<double>& var, const string& Equatio
 		return re;
 	}
 }
-double lambda(vector<double>& var, std::string Equation) {
+double lambda(vector<double>& var, std::string Equation, int Identity) {
 	vector<vector<double>> A = Hessian(var, Equation);
+	if (A.size() == 1) A[0][0] += Identity;
+	else {
+		vector<vector<double>> nI(2, vector<double>(2, 0));
+		nI[0][0] = nI[1][1] = Identity;
+		A = A + nI;
+	}
 	vector<double> h =  -gradient(var, Equation) ;
 	return (h * h) / ((A * h)*h);
 }
-double alpha(vector<double>& var, vector<double>& s, std::string Equation) {
+double alpha(vector<double>& var, vector<double>& s, std::string Equation, int Identity) {
 	vector<vector<double>> A = Hessian(var, Equation);
+	if (A.size() == 1) A[0][0] += Identity;
+	else {
+		vector<vector<double>> nI(2, vector<double>(2, 0));
+		nI[0][0] = nI[1][1] = Identity;
+		A = A + nI;
+	}
 	vector<double> h = -gradient(var, Equation);
 	return (h * h) / ((A * s)*s);
 }

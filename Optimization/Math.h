@@ -38,8 +38,8 @@ vector<double> gradient(vector<double>& var, std::string Equation);
 vector<vector<double>> Hessian(const vector<double>& var, const string& Equation);
 vector<vector<double>> Hessian2(const vector<double>& var, const string& Equation);
 //lambda and alpha
-double lambda(vector<double>& var, std::string Equation);
-double alpha(vector<double>& var, vector<double>& s, std::string Equation);
+double lambda(vector<double>& var, std::string Equation, int Identity);
+double alpha(vector<double>& var, vector<double>& s, std::string Equation, int Identity);
 //¨ç¦¡³B²z
 double F(std::vector<double>Var, std::string Equation);
 double TriFuction(int index, double value);
