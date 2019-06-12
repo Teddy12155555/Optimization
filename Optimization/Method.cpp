@@ -136,6 +136,7 @@ std::stringstream Newton(std::map < std::string, std::vector<double>>v, std::str
 			bool brek = false;
 			std::vector<double> gradTemp = gradient(v0, e);
 			std::vector<std::vector<double>> HessianTemp = Hessian2(gradTemp, e);
+			std::vector<std::vector<double>>HessianIv = HessianTemp;
 			for (int i = 0; i < HessianTemp.size(); i++) {
 				for (int j = 0; j < HessianTemp[i].size(); j++)
 					if (HessianTemp[i][j] == DBL_MAX) { brek = true; break; }
@@ -144,11 +145,11 @@ std::stringstream Newton(std::map < std::string, std::vector<double>>v, std::str
 			ss << "Hessian: ";
 			for (int i = 0; i < HessianTemp.size(); i++)
 				ss << HessianTemp[i] << endl;
-			HessianTemp = Inverse(HessianTemp);
+			HessianIv = Inverse(HessianTemp);
 			ss << "Hessian inverse: ";
-			for (int i = 0; i < HessianTemp.size(); i++)
-				ss << HessianTemp[i] << endl;
-			v1 = mult(HessianTemp, gradTemp);
+			for (int i = 0; i < HessianIv.size(); i++)
+				ss << HessianIv[i] << endl;
+			v1 = mult(HessianIv, gradTemp);
 			v1 = -1 * v1;
 			if (v1 != v1) {
 				ss.str("");
@@ -162,6 +163,31 @@ std::stringstream Newton(std::map < std::string, std::vector<double>>v, std::str
 					v1[i] *= 0.9;
 			}
 			v1 = v0 + v1;
+			/////////fucking fix
+			while (F(v1,e) > F(v0,e))
+			{
+				if (HessianTemp.size() == 1)HessianTemp[0][0] += 1;
+				else
+				{
+					HessianTemp[0][0] += 1; HessianTemp[1][1] += 1;
+				}
+				HessianIv = Inverse(HessianTemp);
+				v1 = mult(HessianIv, gradTemp);
+				v1 = -1 * v1;
+				if (v1 != v1) {
+					ss.str("");
+					ss.clear();
+					ss << "error" << endl;
+					return ss;
+				}
+				while ((z = F(v0 + v1, e)) != z)
+				{
+					for (int i = 0; i < v0.size(); i++)
+						v1[i] *= 0.9;
+				}
+				v1 = v0 + v1;
+			}
+			/////////
 			ss << "x: \n";
 			ss << v1 << endl;
 			debug++;
@@ -249,6 +275,7 @@ std::stringstream Quasi_Newton(std::map < std::string, std::vector<double>>v, st
 			v0 = v1;
 			std::vector<double>g = gradient(v0, e);
 			if (g[0] == 0)break;
+
 			d[0] = -(g[0]*I[0]);
 			std::vector<double> a(1, 0);
 			std::vector<std::vector<double>>Htemp = Hessian(v0, e);
@@ -263,13 +290,27 @@ std::stringstream Quasi_Newton(std::map < std::string, std::vector<double>>v, st
 					delX *= 0.9;
 					v1[0] += delX;
 				}
-				ss << "x : " << v1 << endl;
+				
+			////fucking fix
+				while (F(v1,e) > F(v0,e))
+				{
+					Htemp[0][0] += 1;
+					double A = -((g[0]) / (Htemp[0][0] * d[0]));
+					//
+					double delX = A * d[0];
+					v1[0] = v0[0] + delX;
+				}
+			////
+			ss << "x : " << v1 << endl;
+			//
 			double delG = gradient(v1, e)[0] - g[0];
 			I[0] = I[0] + (delX * delX)/(delX*delG) - (I[0] * g[0] * I[0] * g[0])/(g[0] * I[0] * g[0]) ;
 			ss << "Hessian : " << I << endl;
 			ss << endl;
+
 			++lit;
 		} while (abs(F(v0,e) - F (v1,e)) > error && lit < limit);
+
 		ss << "min : " << F(v1, e) << endl;
 		//cout << v1 << endl;
 	}
@@ -295,6 +336,15 @@ std::stringstream Quasi_Newton(std::map < std::string, std::vector<double>>v, st
 				v1 = v1 + (A * d);
 
 			}
+			//////fucking fix
+			while (F(v1,e) > F(v0,e))
+			{
+				Htemp[0][0] += 1; Htemp[1][1] += 1;
+				Temp = mult(Htemp, d);
+				double A = -((d[0] * g[0] + d[1] * g[1]) / (Temp[0] * d[0] + Temp[1] * d[1]));
+				v1 = v0 + (A * d);
+			}
+			//////
 			ss << "x : " << v1 << endl;
 			std::vector<double>delX = A * d;
 			std::vector<double>delG = gradient(v1, e) - gradient(v0, e);
